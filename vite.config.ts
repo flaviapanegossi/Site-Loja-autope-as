@@ -2,8 +2,12 @@ import { sites } from '@openai/sites-vite-plugin';
 import tailwindcss from '@tailwindcss/postcss';
 import vinext from 'vinext';
 import { defineConfig } from 'vite';
-import hostingConfig from './.openai/hosting.json';
+import fs from 'node:fs';
+import path from 'node:path';
 
+const hostingConfig = fs.existsSync(path.resolve('.openai/hosting.json'))
+  ? JSON.parse(fs.readFileSync(path.resolve('.openai/hosting.json'), 'utf8'))
+  : {};
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   '00000000-0000-4000-8000-000000000000';
 
