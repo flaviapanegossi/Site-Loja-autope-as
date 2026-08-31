@@ -26,6 +26,11 @@ const sections: { title: string; fields: { key: ContentKey; label: string; multi
     { key: 'weekdayHours', label: 'Segunda a sexta' },
     { key: 'saturdayHours', label: 'Sábado' },
   ] },
+  { title: 'Aparência', fields: [
+    { key: 'accentColor', label: 'Cor principal' },
+    { key: 'surfaceColor', label: 'Cor de fundo' },
+    { key: 'headingScale', label: 'Escala dos títulos' },
+  ] },
 ];
 
 export default function AdminEditor() {
