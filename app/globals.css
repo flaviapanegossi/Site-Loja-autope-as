@@ -180,8 +180,7 @@ h1 em { color: #8C8C8C; font-style: normal; animation: hero-copy-in .65s .08s cu
 @media (max-width: 1060px) { .about-value-grid { grid-template-columns: repeat(2, 1fr); } .about-service { grid-template-columns: 1fr 1fr; } .about-service .about-whatsapp { grid-column: 1 / -1; } }
 @media (max-width: 760px) {
   .about-hero { width: calc(100% - 40px); margin-top: 20px; grid-template-columns: 1fr; }
-  .about-hero-copy { paddi
-ng: 48px 24px; }
+.about-hero-copy { padding: 48px 24px; }
   .about-hero-image { min-height: 0; aspect-ratio: 3 / 2; grid-row: 1; }
   .about-hero-image::after { background: linear-gradient(180deg, transparent 65%, #000); }
   .about-values { width: calc(100% - 40px); padding: 88px 0; }
