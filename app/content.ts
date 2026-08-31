@@ -13,6 +13,9 @@ export const defaultSiteContent = {
   address: 'Rua José Santiago, 52 – Vila Santa Dorotheia',
   weekdayHours: '7h30 às 11h • 13h às 17h30',
   saturdayHours: '7h30 às 11h',
+  accentColor: '#25D366',
+  surfaceColor: '#ECECEC',
+  headingScale: '1',
 } as const;
 
 export type ContentKey = keyof typeof defaultSiteContent;
