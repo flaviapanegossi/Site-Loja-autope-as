@@ -9,7 +9,7 @@ const hostingConfig = fs.existsSync(path.resolve('.openai/hosting.json'))
   ? JSON.parse(fs.readFileSync(path.resolve('.openai/hosting.json'), 'utf8'))
   : {};
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
-  '00000000-0000-4000-8000-000000000000';
+  '325225cf-be6d-4abd-9874-d738bc4a3efd;
 
 const { d1, r2 } = hostingConfig;
 
