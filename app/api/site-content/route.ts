@@ -2,15 +2,17 @@ import { env } from 'cloudflare:workers';
 import { contentKeys, mergeSiteContent, type ContentKey } from '@/app/content';
 import { siteContentSchema } from '@/db/schema';
 
+const database = (env as unknown as { DB: D1Database }).DB;
+
 export const dynamic = 'force-dynamic';
 
 async function ensureTable() {
-  await env.DB.prepare(siteContentSchema).run();
+  await database.prepare(siteContentSchema).run();
 }
 
 async function readContent() {
   await ensureTable();
-  const result = await env.DB.prepare('SELECT content_key, content_value FROM site_content').all<{ content_key: string; content_value: string }>();
+  const result = await database.prepare('SELECT content_key, content_value FROM site_content').all<{ content_key: string; content_value: string }>();
   const values: Record<string, string> = {};
   for (const row of result.results ?? []) values[row.content_key] = row.content_value;
   return mergeSiteContent(values);
@@ -31,7 +33,7 @@ export async function PUT(request: Request) {
   if (!updates.length) return Response.json({ error: 'Nenhum campo válido foi enviado.' }, { status: 400 });
 
   await ensureTable();
-  await env.DB.batch(updates.map(([key, value]) => env.DB.prepare(
+  await database.batch(updates.map(([key, value]) => database.prepare(
     'INSERT INTO site_content (content_key, content_value, updated_at) VALUES (?, ?, unixepoch()) ON CONFLICT(content_key) DO UPDATE SET content_value = excluded.content_value, updated_at = unixepoch()'
   ).bind(key as ContentKey, value)));
   return Response.json({ content: await readContent() }, { headers: { 'Cache-Control': 'no-store' } });

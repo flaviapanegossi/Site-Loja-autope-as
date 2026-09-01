@@ -1,8 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
+import { useSiteContent } from './use-site-content';
 
 type Product = {
   name: string;
@@ -23,20 +24,20 @@ const products: Product[] = [
   { name: 'Comando de Válvulas', category: 'Distribuição', application: 'Consulte aplicação e disponibilidade', image: 'comando-valvulas-escape.png' },
   { name: 'Kit Completo de Distribuição', category: 'Distribuição', application: 'Consulte aplicação e disponibilidade', image: 'kit-completo-distribuicao-15-pecas.png' },
   { name: 'Biela Motor', category: 'Motor', application: 'Consulte aplicação e disponibilidade', image: 'biela-motor.png' },
-  { name: 'Biela Motor STD', category: 'Motor', application: 'Consulte aplicação e disponibilidade', image: 'biela-motor-std.png' },
+  { name: 'Tampa dianteira do motor c/bomba de Óleo', category: 'Motor', application: 'Tampa dianteira do motor com bomba de óleo integrada', image: 'biela-motor-std.png' },
   { name: 'Tampa de Válvulas', category: 'Motor', application: 'Consulte aplicação e disponibilidade', image: 'tampa-valvulas.png' },
-  { name: 'Jogo de Anéis de Pistão', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'anel-pistao.png' },
-  { name: 'Arruela de Encosto', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'arruela-encosto.png' },
-  { name: 'Bico Injetor Completo', category: 'Injeção', application: 'Variações consolidadas da planilha', image: 'bico-injetor.png' },
-  { name: "Bomba d'Água", category: 'Arrefecimento', application: 'Variações consolidadas da planilha', image: 'bomba-agua.png' },
-  { name: 'Bomba de Vácuo', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'bomba-vacuo.png' },
-  { name: 'Camisa de Cilindro', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'camisa-cilindro.png' },
-  { name: 'Cárter de Óleo', category: 'Lubrificação', application: 'Variações consolidadas da planilha', image: 'carter-oleo.png' },
-  { name: 'Jogo de Casquilhos de Biela', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'casquilho-biela.png' },
-  { name: 'Jogo de Casquilhos de Mancal', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'casquilho-mancal.png' },
-  { name: 'Coletor de Admissão', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'coletor-admissao.png' },
-  { name: 'Pistão com Pino e Travas', category: 'Motor', application: 'Variações consolidadas da planilha', image: 'pistao.png' },
-  { name: 'Turbina de Motor Completa', category: 'Turbo', application: 'Variações consolidadas da planilha', image: 'turbina-motor.png' },
+  { name: 'Jogo de Anéis de Pistão', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'anel-pistao.png' },
+  { name: 'Arruela de Encosto', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'arruela-encosto.png' },
+  { name: 'Bico Injetor Completo', category: 'Injeção', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'bico-injetor.png' },
+  { name: "Bomba d'Água", category: 'Arrefecimento', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'bomba-agua.png' },
+  { name: 'Bomba de Vácuo', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'bomba-vacuo.png' },
+  { name: 'Camisa de Cilindro', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'camisa-cilindro.png' },
+  { name: 'Cárter de Óleo', category: 'Lubrificação', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'carter-oleo.png' },
+  { name: 'Bronzina Biela (móvel) Std', category: 'Motor', application: 'Bronzina de biela (móvel) padrão STD', image: 'casquilho-biela.png' },
+  { name: 'Jogo de Casquilhos de Mancal', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'casquilho-mancal.png' },
+  { name: 'Coletor de Admissão', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'coletor-admissao.png' },
+  { name: 'Pistão com Pino e Travas', category: 'Motor', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'pistao.png' },
+  { name: 'Turbina de Motor Completa', category: 'Turbo', application: 'Consulte aplicações e disponibilidade para seu veículo', image: 'turbina-motor.png' },
 ];
 
 const filters = ['Todos', 'Motor', 'Distribuição', 'Lubrificação', 'Direção', 'Vedação', 'Injeção', 'Arrefecimento', 'Turbo'];
@@ -52,6 +53,7 @@ const heroParts = [
 ];
 
 const WHATSAPP_PHONE = '5567998278414';
+const DEFAULT_WHATSAPP_MESSAGE = 'Encontrei vocês no site, gostaria de consultar sobre uma peça.';
 const whatsappUrl = (message: string) => `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
 
 const benefits = [
@@ -62,46 +64,23 @@ const benefits = [
 ];
 
 export default function Home() {
+  const content = useSiteContent();
   const [activeFilter, setActiveFilter] = useState('Todos');
-  const [quoteItems, setQuoteItems] = useState<string[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [compatibilityMessage, setCompatibilityMessage] = useState('');
   const [newsletterSent, setNewsletterSent] = useState(false);
   const [activePart, setActivePart] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [pageVisible, setPageVisible] = useState(true);
 
   const navigatePart = useCallback((next: number) => {
-    if (isAnimating || next === activePart) return;
-    setIsAnimating(true);
+    if (next === activePart) return;
     setActivePart((next + heroParts.length) % heroParts.length);
-    window.setTimeout(() => setIsAnimating(false), 700);
-  }, [activePart, isAnimating]);
-
-  useEffect(() => {
-    const onVisibility = () => setPageVisible(!document.hidden);
-    document.addEventListener('visibilitychange', onVisibility);
-    heroParts.forEach((part) => { const image = new window.Image(); image.src = `/products/mando/${part.image}`; });
-    return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, []);
-
-  useEffect(() => {
-    if (!pageVisible || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setTimeout(() => navigatePart(activePart + 1), 6500);
-    return () => window.clearTimeout(timer);
-  }, [activePart, navigatePart, pageVisible]);
+  }, [activePart]);
 
   const visibleProducts = useMemo(
     () => activeFilter === 'Todos' ? products : products.filter((product) => product.category === activeFilter),
     [activeFilter],
   );
-
-  function toggleQuote(productName: string) {
-    setQuoteItems((current) => current.includes(productName)
-      ? current.filter((name) => name !== productName)
-      : [...current, productName]);
-  }
 
   function handleCompatibility(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -122,7 +101,7 @@ export default function Home() {
   }
 
   return (
-    <main>
+    <main style={{ '--accent': content.accentColor, '--surface': content.surfaceColor, '--heading-scale': content.headingScale } as React.CSSProperties}>
       <div className="topbar">
         <p>Autopeças em Campo Grande/MS • Atendimento em todo Mato Grosso do Sul</p>
         <a className="whatsapp-link" href={whatsappUrl('Olá! Gostaria de falar com um especialista em peças para motor.')} target="_blank" rel="noreferrer">WhatsApp: (67) 99827-8414 <span>↗</span></a>
@@ -130,19 +109,18 @@ export default function Home() {
 
       <header className="site-header">
         <a className="brand brand-logo" href="#inicio" aria-label="Rafa Auto Peças — início">
-          <Image src="/rafa-auto-pecas-logo.png" alt="Rafa Auto Peças — especialista em peças para motor" width={1003} height={1259} priority />
+          <Image src="/logo-header-rafa.png" alt="Rafa Auto Peças — especialista em peças para motor" width={2025} height={2531} priority />
         </a>
-        <nav className={menuOpen ? 'nav-open' : ''} aria-label="Navegação principal">
+        <nav id="site-navigation" className={menuOpen ? 'nav-open' : ''} aria-label="Navegação principal">
           <a href="/catalogo" onClick={() => setMenuOpen(false)}>Catálogo</a>
-          <a href="#compatibilidade" onClick={() => setMenuOpen(false)}>Aplicação</a>
-          <a href="/sobre" onClick={() => setMenuOpen(false)}>Sobre nós</a>
+          <a href="#compatibilidade" onClick={() => setMenuOpen(false)}>Encontrar peças</a>
+          <a href="/sobre" onClick={() => setMenuOpen(false)}>Quem somos</a>
           <a href="/contato" onClick={() => setMenuOpen(false)}>Contato</a>
         </nav>
         <div className="header-actions">
           <button className="icon-action" type="button" aria-label="Buscar" aria-expanded={searchOpen} onClick={() => setSearchOpen((open) => !open)}>⌕</button>
-          <span className="quote-count" aria-label={`${quoteItems.length} itens na cotação`}>{quoteItems.length}</span>
-          <a className="header-cta whatsapp-button" href={whatsappUrl('Olá! Gostaria de consultar uma peça para motor.')} target="_blank" rel="noreferrer">Consultar no WhatsApp <span>↗</span></a>
-          <button className="menu-button" type="button" aria-label="Abrir menu" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}><i /><i /></button>
+          <a className="header-cta whatsapp-button" href={whatsappUrl(DEFAULT_WHATSAPP_MESSAGE)} target="_blank" rel="noreferrer">Consultar no WhatsApp <span>↗</span></a>
+          <button className="menu-button" type="button" aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen} aria-controls="site-navigation" onClick={() => setMenuOpen((open) => !open)}><i /><i /></button>
         </div>
       </header>
 
@@ -156,22 +134,22 @@ export default function Home() {
 
       <section className="hero" id="inicio">
         <div className="hero-copy">
-          <p className="hero-badge"><i /><i /><i /><span>Autopeças</span></p>
-          <h1>Especialistas<br /><em>em peças para<br />motor</em><small>em Campo Grande MS.</small></h1>
+          <p className="hero-badge"><i /><i /><i /><span>Autopeças especializada</span></p>
+          <h1>{content.homeHeroTitle}<small>{content.homeHeroLocation}</small></h1>
           <span className="hero-rule" />
-          <p className="hero-description">Peças para motores nacionais e importados, com atendimento para mecânicas, oficinas e retíficas.</p>
+          <p className="hero-description">{content.homeHeroDescription}</p>
           <div className="hero-actions">
             <a className="button button-primary" href="/catalogo"><span>→</span> Ver catálogo</a>
-            <a className="button button-secondary whatsapp-button" href={whatsappUrl('Olá! Gostaria de consultar uma peça para motor.')} target="_blank" rel="noreferrer"><b>◉</b> Falar no WhatsApp</a>
+            <a className="button button-secondary whatsapp-button" href={whatsappUrl(DEFAULT_WHATSAPP_MESSAGE)} target="_blank" rel="noreferrer"><b aria-hidden="true">◉</b> Falar no WhatsApp</a>
           </div>
         </div>
 
-        <div className="hero-visual" aria-live="polite">
-          <strong className={`hero-backdrop-word ${heroParts[activePart].name.length > 11 ? 'word-long' : heroParts[activePart].name.length > 8 ? 'word-medium' : 'word-short'}`}>{heroParts[activePart].name}</strong>
+        <div className={`hero-visual hero-part-${activePart}`} aria-live="polite">
+          <strong aria-hidden="true" className={`hero-backdrop-word ${heroParts[activePart].name.length > 11 ? 'word-long' : heroParts[activePart].name.length > 8 ? 'word-medium' : 'word-short'}`}>{heroParts[activePart].name}</strong>
           <div className="hero-spec"><b>＋</b><span>Precisão<br />Resistência<br />Desempenho</span></div>
           <span className="hero-dot-field" aria-hidden="true" />
           <div className="hero-product-stage">
-            <div className="hero-product-spin" key={heroParts[activePart].name}><Image src={`/products/mando/${heroParts[activePart].image}`} alt={heroParts[activePart].name} width={1536} height={1024} priority /></div>
+            <div className="hero-product-spin" key={heroParts[activePart].name} onAnimationEnd={(event) => { if (event.animationName === 'hero-part-360' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) navigatePart(activePart + 1); }}><Image src={`/products/mando/${heroParts[activePart].image}`} alt={heroParts[activePart].name} width={1536} height={1024} priority sizes="(max-width: 760px) 96vw, 55vw" /></div>
             <span className="hero-product-shadow" aria-hidden="true" />
             <span className="hero-platform" aria-hidden="true" />
           </div>
@@ -180,7 +158,6 @@ export default function Home() {
           <button className="carousel-arrow" type="button" aria-label="Peça anterior" onClick={() => navigatePart(activePart - 1)}>‹</button>
           <div className="carousel-progress"><strong>0{activePart + 1}</strong><span>/ 04</span><i><b style={{ width: `${(activePart + 1) * 25}%` }} /></i></div>
           <div className="carousel-tabs">{heroParts.map((part, index) => <button className={activePart === index ? 'active' : ''} type="button" key={part.name} onClick={() => navigatePart(index)}><small>0{index + 1}</small><strong>{part.name}</strong></button>)}</div>
-          <p className="drag-label">☝ <span>Arraste para<br />navegar</span></p>
           <button className="carousel-arrow" type="button" aria-label="Próxima peça" onClick={() => navigatePart(activePart + 1)}>›</button>
         </div>
       </section>
@@ -196,8 +173,8 @@ export default function Home() {
 
       <section className="compatibility-section" id="compatibilidade">
         <div className="compatibility-copy">
-          <p className="eyebrow light-eyebrow"><span /> Consulte sua aplicação</p>
-          <h2>Consulte a aplicação da peça<br />para o seu veículo.</h2>
+          <p className="eyebrow light-eyebrow"><span /> Encontrar Peça</p>
+          <h2>Consulte peças disponíveis!</h2>
           <p>Informe os dados do veículo para nossa equipe verificar a aplicação e disponibilidade da peça.</p>
           <div className="compatibility-note"><b>✓</b><span><strong>Mais segurança na identificação da peça.</strong><small>Modelo, ano e motorização ajudam a identificar o componente correspondente.</small></span></div>
         </div>
@@ -215,21 +192,19 @@ export default function Home() {
 
       <section className="section products-section" id="produtos">
         <div className="section-heading product-heading">
-          <div><p className="eyebrow"><span /> Estoque selecionado</p><h2>Peças para motor em destaque</h2></div>
-          <p>Confira alguns dos componentes disponíveis. Consulte nossa equipe para confirmar aplicação, preço e disponibilidade.</p>
+          <div><p className="eyebrow"><span /> Linha de produtos</p><h2>Peças para motor e linha mecânica em Campo Grande/MS</h2></div>
+          <p>Encontre virabrequim, cabeçote, bomba de óleo, corrente de comando, tampa de válvula e outras peças para motor. Trabalhamos também com itens de distribuição, lubrificação, direção, vedação, injeção, arrefecimento e turbo, com atendimento para mecânicas, oficinas e retíficas em Campo Grande e todo Mato Grosso do Sul.</p>
         </div>
         <div className="filter-row" role="group" aria-label="Filtrar produtos">
           {filters.map((filter) => <button key={filter} type="button" className={activeFilter === filter ? 'active' : ''} onClick={() => setActiveFilter(filter)}>{filter}</button>)}
         </div>
         <div className="product-grid">
           {visibleProducts.map((product) => {
-            const selected = quoteItems.includes(product.name);
             return (
               <article className="product-card" key={product.name}>
                 <div className="product-image">
                   {product.badge && <span className="product-badge">{product.badge}</span>}
                   <Image src={`/products/mando/${product.image}`} alt={product.name} width={1254} height={1254} loading="lazy" sizes="(max-width: 760px) 100vw, (max-width: 1060px) 50vw, 33vw" />
-                  <button type="button" aria-label={`${selected ? 'Remover' : 'Adicionar'} ${product.name} da cotação`} className={selected ? 'quote-button selected' : 'quote-button'} onClick={() => toggleQuote(product.name)}>{selected ? '✓' : '+'}</button>
                 </div>
                 <div className="product-info"><span>{product.category} · MANDO</span><h3>{product.name}</h3><p>{product.application}</p><a className="whatsapp-link" href={whatsappUrl(`Olá! Gostaria de consultar o ${product.name}.`)} target="_blank" rel="noreferrer">Consultar esta peça <b>→</b></a></div>
               </article>
@@ -241,13 +216,13 @@ export default function Home() {
       <section className="performance-band" id="sobre">
         <div className="performance-visual">
           <Image src="/rafa-auto-pecas-fachada.jpg" alt="Fachada da Rafa Auto Peças em Campo Grande, Mato Grosso do Sul" width={2976} height={1984} sizes="(max-width: 760px) 100vw, 50vw" />
-          <span>RAFA AUTO PEÇAS<br /><small>CAMPO GRANDE / MS</small></span>
         </div>
         <div className="performance-copy">
           <p className="eyebrow light-eyebrow"><span /> Sobre nossa empresa</p>
-          <h2>Especialistas em peças para motor e linha mecânica.</h2>
-          <p>Autopeças em Campo Grande/MS especializada em peças para motor e linha mecânica. Somos revendedores Mando e contamos com um amplo estoque de componentes para diferentes motores e aplicações, atendendo mecânicos, oficinas, retíficas e clientes de todo Mato Grosso do Sul.</p>
-          <div className="performance-stats"><div><strong>PEÇAS</strong><span>Linha<br />especializada</span></div><div><strong>APLICAÇÃO</strong><span>Consulta<br />por veículo</span></div><div><strong>ATENDIMENTO</strong><span>Todo Mato<br />Grosso do Sul</span></div></div>
+          <h2>{content.aboutTitle}</h2>
+          <span className="about-divider"><i /><i /><i /></span>
+          <p>{content.aboutDescription}</p>
+          <div className="performance-stats"><div><b>◉</b><strong>REVENDEDOR MANDO</strong><span>Peças com procedência</span></div><div><b>⚙</b><strong>LINHA MECÂNICA</strong><span>Diversas aplicações</span></div><div><b>⌖</b><strong>CAMPO GRANDE/MS</strong><span>Atendemos todo estado do MS</span></div></div>
         </div>
       </section>
 
@@ -259,14 +234,13 @@ export default function Home() {
 
       <footer>
         <div className="footer-main">
-          <div className="footer-brand"><a className="brand brand-light footer-logo" href="#inicio" aria-label="Rafa Auto Peças — início"><Image src="/rafa-auto-pecas-logo.png" alt="Rafa Auto Peças — especialista em peças para motor" width={1003} height={1259} /></a><p>Autopeças especializada em peças para motor e linha mecânica em Campo Grande/MS, com atendimento para clientes de todo Mato Grosso do Sul.</p><span>WhatsApp: (67) 99827-8414</span></div>
-          <div><h3>Comprar</h3><a href="/catalogo">Catálogo completo</a><a href="#compatibilidade">Consultar aplicação</a><a href="/catalogo">Linha MANDO</a></div>
-          <div><h3>Contato</h3><a href="/contato">Fale conosco</a><a href="tel:+556730436362">(67) 3043-6362</a><a className="whatsapp-link" href={whatsappUrl('Olá! Gostaria de consultar uma peça.')} target="_blank" rel="noreferrer">(67) 99827-8414</a><a href="#compatibilidade">Consultar aplicação</a></div>
+          <div className="footer-brand"><a className="brand brand-light footer-logo" href="#inicio" aria-label="Rafa Auto Peças — início"><Image src="/rafa-auto-pecas-logo.png" alt="Rafa Auto Peças — especialista em peças para motor" width={1003} height={1259} /></a><p>Autopeças especializada em peças para motor e linha mecânica em Campo Grande/MS, com atendimento para clientes de todo Mato Grosso do Sul.</p></div>
+          <div><h3>Comprar</h3><a href="/catalogo">Catálogo completo</a><a href="#compatibilidade">Encontrar peças</a></div>
+          <div><h3>Contato</h3><a href="/contato">Fale conosco</a><a href="tel:+556730436362">(67) 3043-6362</a><a className="whatsapp-link" href={whatsappUrl('Olá! Gostaria de consultar uma peça.')} target="_blank" rel="noreferrer">(67) 99827-8414</a><a href="#compatibilidade">Encontrar peças</a></div>
           <div><h3>Endereço e horários</h3><a href="#atendimento">Rua José Santiago, 52 – Vila Santa Dorotheia</a><a href="#atendimento">Campo Grande/MS</a><p className="footer-hours"><strong>Segunda a sexta</strong>7h30 às 11h · 13h às 17h30<strong>Sábado</strong>7h30 às 11h</p></div>
         </div>
-        <div className="footer-bottom"><span>© 2026 Rafa Auto Peças.</span><span>Peças para motor e linha mecânica em Campo Grande/MS.</span></div>
+        <div className="footer-bottom"><span>© 2026 Rafa Autopeças — todos os direitos reservados.</span><span>Peças para motor e linha mecânica em Campo Grande/MS.</span><a href="https://www.instagram.com/midioramarketing/" target="_blank" rel="noreferrer">Site desenvolvido por Midiora Marketing</a></div>
       </footer>
     </main>
   );
 }
-

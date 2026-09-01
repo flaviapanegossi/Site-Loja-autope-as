@@ -1,15 +1,18 @@
-
-import tailwindcss from '@tailwindcss/postcss';
+import { sites } from '@openai/sites-vite-plugin';
 import vinext from 'vinext';
 import { defineConfig } from 'vite';
+// The hosting metadata is provided by the Sites environment.  Keep a safe
+// fallback so GitHub/Cloudflare builds do not fail when that local-only file
+// is not present in the repository.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const hostingConfig = fs.existsSync(path.resolve('.openai/hosting.json'))
   ? JSON.parse(fs.readFileSync(path.resolve('.openai/hosting.json'), 'utf8'))
   : {};
+
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
- '325225cf-be6d-4abd-9874-d738bc4a3efd';
+  '00000000-0000-4000-8000-000000000000';
 
 const { d1, r2 } = hostingConfig;
 
@@ -49,12 +52,13 @@ export default defineConfig(async () => {
   const { cloudflare } = await import('@cloudflare/vite-plugin');
 
   return {
-    css: { postcss: { plugins: [tailwindcss()] } },
+    css: { postcss: { plugins: [] } },
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
     plugins: [
       vinext(),
+      sites(),
       cloudflare({
         viteEnvironment: { name: 'rsc', childEnvironments: ['ssr'] },
         config: localBindingConfig,
@@ -62,4 +66,3 @@ export default defineConfig(async () => {
     ],
   };
 });
-
